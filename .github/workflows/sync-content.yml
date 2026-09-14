@@ -1,0 +1,44 @@
+name: Sync main into content
+
+# Keeps the CMS branch on the latest code and schemas, so its preview builds
+# with what `main` has. Runs after every push to main (including the merge of
+# the content PR itself). Pushes made with GITHUB_TOKEN don't trigger other
+# workflows, so this cannot loop.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-content
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Merge main into content
+        run: |
+          if ! git ls-remote --exit-code --heads origin content >/dev/null; then
+            echo "No content branch yet — nothing to sync."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B content origin/content
+          if git merge-base --is-ancestor origin/main HEAD; then
+            echo "content already contains main."
+            exit 0
+          fi
+          if ! git merge --no-edit origin/main; then
+            echo "::error::main and content conflict. Merge main into content by hand and resolve the conflict."
+            exit 1
+          fi
+          git push origin content

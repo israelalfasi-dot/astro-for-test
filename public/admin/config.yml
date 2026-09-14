@@ -1,7 +1,9 @@
 backend:
   name: github
   repo: israelalfasi-dot/astro-for-test
-  branch: main
+  # Every CMS save commits to `content`. Changes reach `main` through one standing
+  # PR (content → main), opened automatically by .github/workflows/content-pr.yml.
+  branch: content
 
 media_folder: public/images
 public_folder: /images

@@ -1,0 +1,42 @@
+name: Open the content PR
+
+# Every CMS save pushes to `content`. This makes sure one PR (content → main)
+# is open to collect them, so a reviewer approves a batch instead of each save.
+on:
+  push:
+    branches: [content]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  ensure-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Open the PR if none is open
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          open=$(gh pr list --head content --base main --state open --json number --jq 'length')
+          if [ "$open" != "0" ]; then
+            echo "A content PR is already open."
+            exit 0
+          fi
+          ahead=$(git rev-list --count origin/main..origin/content)
+          if [ "$ahead" = "0" ]; then
+            echo "content has nothing that main doesn't — no PR needed."
+            exit 0
+          fi
+          gh pr create --head content --base main \
+            --title "Content updates" \
+            --body "Content saved from the CMS since the last merge. Each save is one commit.
+
+          **Preview:** https://content--astro-for-test-blog.netlify.app
+
+          Merge with **Create a merge commit** (not squash), and don't delete the \`content\` branch."
