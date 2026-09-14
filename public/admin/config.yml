@@ -111,7 +111,7 @@ collections:
       - { name: description, label: Description, widget: text, maxlength: 320 }
       - { name: presence, label: Presence, widget: string, required: false, hint: "\"Attending\" or \"Booth #727\"" }
       - { name: location, label: Location, widget: string, required: false }
-      - { name: href, label: Event website, widget: string, required: false }
+      - { name: href, label: Event website, widget: string, required: false, pattern: ["^https?://", "Full URL starting with https://"] }
       - { name: ctaLabel, label: Button label override, widget: string, required: false }
       - name: banner
         label: Banner
@@ -209,7 +209,7 @@ collections:
       - { name: modelsInstalled, label: Models installed, widget: string }
       - { name: description, label: Meta description, widget: text, required: false }
       - { name: order, label: Listing order, widget: number, value_type: int, min: 1 }
-      - { name: caseStudy, label: Case study URL, widget: string, required: false }
+      - { name: caseStudy, label: Case study URL, widget: string, required: false, hint: "External link (e.g. a PDF viewer) — a full URL, not a site path", pattern: ["^https?://", "Full URL starting with https://"] }
       - name: quote
         label: Quote
         widget: object
@@ -255,4 +255,4 @@ collections:
         widget: object
         required: false
         fields:
-          - { name: url, label: Video URL, widget: string }
+          - { name: url, label: Video URL, widget: string, pattern: ["^https?://", "Full URL starting with https://"] }
