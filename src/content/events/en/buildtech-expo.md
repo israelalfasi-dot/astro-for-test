@@ -8,7 +8,8 @@ description: Three days of building-technology exhibitors, live demos and sessio
 presence: 'Booth #412'
 location: Convention Center, Chicago, IL
 href: https://example.com/buildtech-expo
+ctaLabel: ''
 banner:
-  src: ../../../assets/images/placeholder.svg
+  src: ../../../assets/images/Background.jpg
   alt: Northwind booth at BuildTech Expo
 ---
