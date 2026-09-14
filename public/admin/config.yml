@@ -1,0 +1,29 @@
+backend:
+  name: github
+  repo: israelalfasi-dot/astro-for-test
+  branch: main
+
+media_folder: public/images
+public_folder: /images
+
+collections:
+  - name: posts
+    label: פוסטים
+    label_singular: פוסט
+    folder: src/content/posts
+    extension: md
+    format: frontmatter
+    create: true
+    slug: "{{slug}}"
+    sortable_fields: [date, title, author]
+    summary: "{{title}} — {{date}}"
+    fields:
+      - { name: title, label: כותרת, widget: string }
+      - { name: description, label: תיאור, widget: text }
+      - name: date
+        label: תאריך
+        widget: datetime
+        format: YYYY-MM-DD
+        time_format: false
+      - { name: author, label: כותב, widget: string }
+      - { name: body, label: תוכן, widget: markdown }
