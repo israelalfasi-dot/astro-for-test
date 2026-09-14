@@ -1,6 +1,6 @@
 ---
-translationKey: innovacon2026
-title: innovacon2026
+translationKey: innovacon2029
+title: innovacon2029
 lang: en
 summary: ggfdgfdgfdgss
 publishDate: 2026-09-14
