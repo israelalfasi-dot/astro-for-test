@@ -1,6 +1,6 @@
 ---
 translationKey: buildtech-expo
-title: BuildTech Expo 2028
+title: BuildTech Expo2 2028
 lang: en
 startDate: 2026-11-04
 endDate: 2026-11-06
