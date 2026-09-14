@@ -17,6 +17,7 @@ facade:
   alt: gfd
 card:
   src: ../../../assets/images/Louvers — Round vents.jpg
+  alt: gfdfd
 featuredModelImage:
   src: ../../../assets/images/Background.jpg
   alt: dfsddf
