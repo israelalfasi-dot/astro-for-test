@@ -13,6 +13,13 @@ export type Lang = (typeof langs)[number];
 /** Articles serve their hero from a media bucket, never from git. */
 export const MEDIA_ORIGIN = 'https://media.example.com';
 
+/**
+ * An optional field the CMS may save as '' instead of leaving it out. Empty means
+ * "not set", so it is dropped before validation rather than failing the build.
+ */
+const blankToUndefined = (value: unknown) => (value === '' || value === null ? undefined : value);
+const optional = <T extends z.ZodTypeAny>(schema: T) => z.preprocess(blankToUndefined, schema.optional());
+
 export const translationKey = z
   .string()
   .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'translationKey is kebab-case and locale-neutral');
@@ -101,10 +108,10 @@ export const projectSchema = z.object({
   country: z.enum(Object.keys(projectCountries) as [ProjectCountry, ...ProjectCountry[]]),
   buildingType: z.string().trim().min(1),
   modelsInstalled: z.string().trim().min(1),
-  description: z.string().trim().min(1).optional(),
+  description: optional(z.string().trim().min(1)),
   /** Listing position, not publish date. */
   order: z.number().int().positive(),
-  caseStudy: z.string().url().optional(),
+  caseStudy: optional(z.string().url()),
   quote: z
     .object({
       text: z.string().trim().min(1),
@@ -128,12 +135,12 @@ export const eventSchema = z
     lang: z.enum(langs),
     translationKey,
     startDate: z.coerce.date(),
-    endDate: z.coerce.date().optional(),
+    endDate: optional(z.coerce.date()),
     description: z.string().trim().min(1).max(320),
-    presence: z.string().trim().min(1).optional(),
-    location: z.string().trim().min(1).optional(),
-    href: z.string().url().optional(),
-    ctaLabel: z.string().trim().min(1).optional(),
+    presence: optional(z.string().trim().min(1)),
+    location: optional(z.string().trim().min(1)),
+    href: optional(z.string().url()),
+    ctaLabel: optional(z.string().trim().min(1)),
   })
   .refine((e) => !e.endDate || e.endDate >= e.startDate, 'endDate cannot precede startDate');
 
