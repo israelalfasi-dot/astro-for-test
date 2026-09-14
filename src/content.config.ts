@@ -62,8 +62,9 @@ const projects = defineCollection({
       facade: pictured(image),
       statsBackground: pictured(image).optional(),
       video: z.object({ url: z.string().url() }).optional(),
-      // The card's caption already names the project, so its alt may be empty.
-      card: z.object({ src: image(), alt: z.string() }),
+      // The card's caption already names the project, so its alt may be empty — and the
+      // CMS omits an empty optional field entirely, so a missing alt means ''.
+      card: z.object({ src: image(), alt: z.string().default('') }),
       gallery: z.array(pictured(image)).default([]),
       featuredModelImage: pictured(image),
     }),
