@@ -6,6 +6,10 @@ backend:
 media_folder: public/images
 public_folder: /images
 
+# Leave optional fields out of the file when empty — the content schemas reject "" and [].
+output:
+  omit_empty_optional_fields: true
+
 # Used by the articles collection: one folder per locale (articles/en, articles/fr).
 i18n:
   structure: multiple_folders
