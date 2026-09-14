@@ -1,0 +1,112 @@
+---
+import { render } from 'astro:content';
+import { Image } from 'astro:assets';
+import Layout from '../../../layouts/Layout.astro';
+import placeholder from '../../../assets/images/placeholder.svg';
+import { demoCollections, getDemoEntries, type DemoCollection } from '../../../lib/demo/collections';
+import { hotTopicCategories, isUpcoming, projectCountries } from '../../../lib/demo/schemas';
+
+export async function getStaticPaths() {
+  const paths = [];
+  for (const { name } of demoCollections) {
+    for (const entry of await getDemoEntries(name)) {
+      paths.push({ params: { collection: name, id: entry.id }, props: { name, entry } });
+    }
+  }
+  return paths;
+}
+
+const { name, entry } = Astro.props as { name: DemoCollection; entry: any };
+const { Content } = await render(entry);
+const label = demoCollections.find((c) => c.name === name)!.label;
+const data = entry.data as Record<string, any>;
+
+// Local images come back as ImageMetadata; articles keep a media-bucket URL instead.
+const isImage = (v: any) => v && typeof v === 'object' && 'src' in v && typeof v.src === 'object';
+const heroField = data.hero ?? data.facade ?? data.banner;
+const hero = heroField
+  ? { src: isImage(heroField) ? heroField.src : placeholder, alt: heroField.alt }
+  : null;
+
+const show = (value: any): string => {
+  if (value instanceof Date) return value.toISOString().slice(0, 10);
+  if (isImage(value)) return `🖼 ${value.src.src.split('/').pop()?.split('?')[0]} — alt: "${value.alt}"`;
+  if (Array.isArray(value)) return value.map(show).join('\n');
+  if (value && typeof value === 'object') {
+    return Object.entries(value).map(([k, v]) => `${k}: ${show(v)}`).join('\n');
+  }
+  return String(value);
+};
+
+const extras: [string, string][] = [];
+if (name === 'events') extras.push(['→ list (computed)', isUpcoming(data as any) ? 'Upcoming' : 'Recent']);
+if (name === 'hot-topics') {
+  extras.push(['→ category labels', data.categories.map((c: keyof typeof hotTopicCategories) => hotTopicCategories[c]).join(', ')]);
+}
+if (name === 'projects') extras.push(['→ country label', projectCountries[data.country as 'US' | 'CA']]);
+
+const hasBody = Boolean(entry.body?.trim());
+---
+
+<Layout title={`${data.title} | ${label}`} lang={data.lang} dir="ltr">
+  <nav class="back"><a href="/demo/">← Content structure demo</a></nav>
+
+  <article>
+    <p class="crumb">{label} · <code>src/content/{name}/{entry.id}.md</code></p>
+    <h1>{data.title}</h1>
+
+    {hero && <Image src={hero.src} alt={hero.alt} class="hero-img" width={1200} height={675} />}
+
+    <h2>Frontmatter</h2>
+    <div class="table-wrap">
+      <table>
+        <tbody>
+          {
+            Object.entries(data).map(([key, value]) => (
+              <tr>
+                <th>{key}</th>
+                <td>{show(value)}</td>
+              </tr>
+            ))
+          }
+          {
+            extras.map(([key, value]) => (
+              <tr class="computed">
+                <th>{key}</th>
+                <td>{value}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Body</h2>
+    {hasBody ? <div class="prose"><Content /></div> : <p class="empty">No body — this collection is frontmatter only.</p>}
+  </article>
+</Layout>
+
+<style>
+  .back { padding-block: 2rem 1rem; }
+  .back a { text-decoration: none; font-weight: 500; }
+  article {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: clamp(1.25rem, 4vw, 2.5rem);
+  }
+  .crumb { margin: 0; color: var(--muted); font-size: 0.9rem; }
+  code { font-size: 0.85rem; }
+  h1 { margin: 0.4rem 0 1.25rem; font-size: clamp(1.7rem, 4.5vw, 2.3rem); line-height: 1.2; }
+  h2 { margin: 2rem 0 0.75rem; font-size: 1.2rem; }
+  .hero-img { width: 100%; height: auto; border-radius: 12px; display: block; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+  th, td { text-align: start; vertical-align: top; padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--border); }
+  th { font-family: ui-monospace, monospace; font-weight: 600; white-space: nowrap; color: var(--accent); width: 1%; }
+  td { white-space: pre-line; overflow-wrap: anywhere; }
+  .computed th, .computed td { color: var(--muted); font-style: italic; }
+  .empty { color: var(--muted); }
+  .prose :global(blockquote) { margin: 1.25rem 0; padding: 0.5rem 1.25rem; border-inline-start: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; }
+</style>

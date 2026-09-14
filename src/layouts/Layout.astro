@@ -1,12 +1,14 @@
 ---
 interface Props {
   title: string;
+  lang?: string;
+  dir?: 'rtl' | 'ltr';
 }
 
-const { title } = Astro.props;
+const { title, lang = 'he', dir = 'rtl' } = Astro.props;
 ---
 
-<html lang="he" dir="rtl">
+<html lang={lang} dir={dir}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />

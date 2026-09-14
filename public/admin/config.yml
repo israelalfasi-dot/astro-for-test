@@ -6,6 +6,12 @@ backend:
 media_folder: public/images
 public_folder: /images
 
+# Used by the articles collection: one folder per locale (articles/en, articles/fr).
+i18n:
+  structure: multiple_folders
+  locales: [en, fr]
+  default_locale: en
+
 collections:
   - name: posts
     label: פוסטים
@@ -27,3 +33,220 @@ collections:
         time_format: false
       - { name: author, label: כותב, widget: string }
       - { name: body, label: תוכן, widget: markdown }
+
+  # ─── Demo of the innova-astro collections ─────────────────────────────────
+
+  - name: articles
+    label: "Demo · Articles"
+    label_singular: Article
+    folder: src/content/articles
+    extension: md
+    format: frontmatter
+    create: true
+    slug: "{{translationKey}}"
+    summary: "{{title}} — {{publishDate}}"
+    i18n: true
+    fields:
+      - { name: title, label: Title, widget: string, i18n: true }
+      - { name: lang, label: Language, widget: select, options: [en, fr], i18n: true }
+      - name: translationKey
+        label: Translation key
+        widget: string
+        hint: "kebab-case, the same in EN and FR — it pairs the two"
+        pattern: ["^[a-z0-9]+(?:-[a-z0-9]+)*$", "kebab-case only"]
+        i18n: duplicate
+      - { name: summary, label: Summary, widget: text, maxlength: 200, i18n: true }
+      - name: publishDate
+        label: Publish date
+        widget: datetime
+        format: YYYY-MM-DD
+        time_format: false
+        picker_utc: true
+        i18n: duplicate
+      - name: hero
+        label: Hero image
+        widget: object
+        required: false
+        i18n: true
+        fields:
+          - name: src
+            label: Image URL
+            widget: string
+            hint: "Served from https://media.example.com/ — images are not stored in git"
+            pattern: ["^https://media\\.example\\.com/", "Must start with https://media.example.com/"]
+            i18n: duplicate
+          - { name: alt, label: Alt text, widget: string, i18n: true }
+      - name: draft
+        label: Draft
+        widget: boolean
+        default: false
+        hint: "Keep on until both EN and FR are ready — a published entry without its mirror fails the build"
+        i18n: true
+      - { name: body, label: Body, widget: markdown, i18n: true }
+
+  - name: events
+    label: "Demo · Events"
+    label_singular: Event
+    folder: src/content/events
+    path: "en/{{slug}}"
+    extension: md
+    format: frontmatter
+    create: true
+    slug: "{{translationKey}}"
+    summary: "{{title}} — {{startDate}}"
+    media_folder: /src/assets/images
+    public_folder: ../../../assets/images
+    fields:
+      - { name: title, label: Title, widget: string }
+      - { name: lang, label: Language, widget: hidden, default: en }
+      - { name: translationKey, label: Translation key, widget: string, pattern: ["^[a-z0-9]+(?:-[a-z0-9]+)*$", "kebab-case only"] }
+      - { name: startDate, label: Start date, widget: datetime, format: YYYY-MM-DD, time_format: false, picker_utc: true }
+      - { name: endDate, label: End date, widget: datetime, format: YYYY-MM-DD, time_format: false, picker_utc: true, required: false, hint: "Last day — leave empty for a one-day event" }
+      - { name: description, label: Description, widget: text, maxlength: 320 }
+      - { name: presence, label: Presence, widget: string, required: false, hint: "\"Attending\" or \"Booth #727\"" }
+      - { name: location, label: Location, widget: string, required: false }
+      - { name: href, label: Event website, widget: string, required: false }
+      - { name: ctaLabel, label: Button label override, widget: string, required: false }
+      - name: banner
+        label: Banner
+        widget: object
+        required: false
+        fields:
+          - { name: src, label: Image, widget: image }
+          - { name: alt, label: Alt text, widget: string }
+
+  - name: hot-topics
+    label: "Demo · Hot Topics"
+    label_singular: Hot Topic
+    folder: src/content/hot-topics
+    path: "en/{{slug}}"
+    extension: md
+    format: frontmatter
+    create: true
+    slug: "{{translationKey}}"
+    summary: "{{title}} — {{publishDate}}"
+    media_folder: /src/assets/images
+    public_folder: ../../../assets/images
+    fields:
+      - { name: title, label: Title, widget: string }
+      - { name: lang, label: Language, widget: hidden, default: en }
+      - { name: translationKey, label: Translation key, widget: string, pattern: ["^[a-z0-9]+(?:-[a-z0-9]+)*$", "kebab-case only"] }
+      - { name: standfirst, label: Standfirst, widget: text, maxlength: 480 }
+      - { name: publishDate, label: Publish date, widget: datetime, format: YYYY-MM-DD, time_format: false, picker_utc: true }
+      - name: categories
+        label: Categories
+        widget: select
+        multiple: true
+        min: 1
+        options:
+          - { label: "Case Studies & Success Stories", value: case-studies-success-stories }
+          - { label: "Past Events", value: events }
+          - { label: "Emerging Trends & Innovation", value: emerging-trends-innovation }
+          - { label: "Indoor Air Quality & Ventilation", value: indoor-air-quality-ventilation }
+          - { label: "System Performance & Efficiency", value: system-performance-efficiency }
+      - name: hero
+        label: Hero image
+        widget: object
+        fields:
+          - { name: src, label: Image, widget: image }
+          - { name: alt, label: Alt text, widget: string }
+      - { name: liveOnly, label: Card only (no page), widget: boolean, default: false, required: false }
+      - { name: body, label: Body, widget: markdown }
+
+  - name: latest-news
+    label: "Demo · Latest News"
+    label_singular: News item
+    folder: src/content/latest-news
+    path: "en/{{slug}}"
+    extension: md
+    format: frontmatter
+    create: true
+    slug: "{{translationKey}}"
+    summary: "{{title}} — {{publishDate}}"
+    media_folder: /src/assets/images
+    public_folder: ../../../assets/images
+    fields:
+      - { name: title, label: Title, widget: string }
+      - { name: lang, label: Language, widget: hidden, default: en }
+      - { name: translationKey, label: Translation key, widget: string, pattern: ["^[a-z0-9]+(?:-[a-z0-9]+)*$", "kebab-case only"] }
+      - { name: standfirst, label: Standfirst, widget: text, maxlength: 480 }
+      - { name: publishDate, label: Publish date, widget: datetime, format: YYYY-MM-DD, time_format: false, picker_utc: true }
+      - name: hero
+        label: Hero image
+        widget: object
+        fields:
+          - { name: src, label: Image, widget: image }
+          - { name: alt, label: Alt text, widget: string }
+      - { name: liveOnly, label: Card only (no page), widget: boolean, default: false, required: false }
+      - { name: body, label: Body, widget: markdown }
+
+  - name: projects
+    label: "Demo · Projects"
+    label_singular: Project
+    folder: src/content/projects
+    path: "en/{{slug}}"
+    extension: md
+    format: frontmatter
+    create: true
+    slug: "{{translationKey}}"
+    summary: "{{order}}. {{title}} — {{address}}"
+    sortable_fields: [order, title]
+    media_folder: /src/assets/images
+    public_folder: ../../../assets/images
+    fields:
+      - { name: title, label: Title, widget: string }
+      - { name: lang, label: Language, widget: hidden, default: en }
+      - { name: translationKey, label: Translation key, widget: string, pattern: ["^[a-z0-9]+(?:-[a-z0-9]+)*$", "kebab-case only"] }
+      - { name: address, label: Address, widget: string, hint: "Street address, City, ST" }
+      - { name: country, label: Country, widget: select, options: [{ label: US, value: US }, { label: Canada, value: CA }] }
+      - { name: buildingType, label: Building type, widget: string }
+      - { name: modelsInstalled, label: Models installed, widget: string }
+      - { name: description, label: Meta description, widget: text, required: false }
+      - { name: order, label: Listing order, widget: number, value_type: int, min: 1 }
+      - { name: caseStudy, label: Case study URL, widget: string, required: false }
+      - name: quote
+        label: Quote
+        widget: object
+        required: false
+        fields:
+          - { name: text, label: Text, widget: text }
+          - { name: name, label: Name, widget: string }
+          - { name: role, label: Role, widget: string }
+      - name: featuredModel
+        label: Featured model
+        widget: object
+        fields:
+          - { name: name, label: Name, widget: string }
+          - { name: href, label: Link, widget: string, pattern: ["^/", "Must be a site path starting with /"] }
+          - { name: ctaLabel, label: Button label, widget: string }
+      - name: facade
+        label: Facade image
+        widget: object
+        fields:
+          - { name: src, label: Image, widget: image }
+          - { name: alt, label: Alt text, widget: string }
+      - name: card
+        label: Card image
+        widget: object
+        fields:
+          - { name: src, label: Image, widget: image }
+          - { name: alt, label: Alt text (may be empty), widget: string, required: false }
+      - name: gallery
+        label: Gallery
+        widget: list
+        required: false
+        fields:
+          - { name: src, label: Image, widget: image }
+          - { name: alt, label: Alt text, widget: string }
+      - name: featuredModelImage
+        label: Featured model image
+        widget: object
+        fields:
+          - { name: src, label: Image, widget: image }
+          - { name: alt, label: Alt text, widget: string }
+      - name: video
+        label: Success-story video
+        widget: object
+        required: false
+        fields:
+          - { name: url, label: Video URL, widget: string }

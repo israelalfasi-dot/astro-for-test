@@ -1,0 +1,79 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { cardLine, demoCollections, getDemoEntries } from '../../lib/demo/collections';
+
+const sections = await Promise.all(
+  demoCollections.map(async (c) => ({ ...c, entries: await getDemoEntries(c.name) }))
+);
+---
+
+<Layout title="Content structure demo" lang="en" dir="ltr">
+  <nav class="back"><a href="/">← Blog</a></nav>
+  <header class="hero">
+    <span class="badge">Demo · invented content</span>
+    <h1>Content structure demo</h1>
+    <p>The innova-astro collections — same folders, fields and rules — with sample entries.</p>
+  </header>
+
+  {
+    sections.map((section) => (
+      <section>
+        <div class="section-head">
+          <h2>{section.label}</h2>
+          <code>src/content/{section.name}/</code>
+        </div>
+        <p class="note">{section.note}</p>
+        <ul class="grid">
+          {section.entries.map((entry) => (
+            <li>
+              <a class="card" href={`/demo/${section.name}/${entry.id}/`}>
+                <span class="path">{entry.id}.md</span>
+                <h3>{entry.data.title}</h3>
+                <p>{cardLine(section.name, entry.data)}</p>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+</Layout>
+
+<style>
+  .back { padding-block: 2rem 0; }
+  .back a { text-decoration: none; font-weight: 500; }
+  .hero { padding-block: 1.5rem 1rem; }
+  .badge {
+    display: inline-block;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 500;
+    font-size: 0.85rem;
+    padding: 0.2rem 0.75rem;
+    border-radius: 999px;
+  }
+  .hero h1 { margin: 0.75rem 0 0.25rem; font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 800; line-height: 1.2; }
+  .hero p { margin: 0; color: var(--muted); }
+  section { margin-top: 2.5rem; }
+  .section-head { display: flex; align-items: baseline; gap: 0.75rem; flex-wrap: wrap; }
+  .section-head h2 { margin: 0; font-size: 1.4rem; }
+  code { font-size: 0.85rem; color: var(--muted); }
+  .note { margin: 0.25rem 0 1rem; color: var(--muted); font-size: 0.95rem; }
+  .grid { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+  .card {
+    display: block;
+    height: 100%;
+    padding: 1.1rem 1.25rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    color: inherit;
+    text-decoration: none;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+  .card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .path { font-family: ui-monospace, monospace; font-size: 0.8rem; color: var(--accent); }
+  .card h3 { margin: 0.35rem 0; font-size: 1.1rem; line-height: 1.35; }
+  .card p { margin: 0; color: var(--muted); font-size: 0.92rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+</style>
