@@ -1,19 +1,279 @@
+# Pages CMS — mirrors the collections in src/content.config.ts.
+# Field rules follow src/lib/demo/schemas.ts so the CMS rejects what the build would.
+
 media:
-  input: public/images
-  output: /images
+  - name: images
+    label: Images (public)
+    input: public/images
+    output: /images
+    categories: [image]
+  # Collection images live in src/assets/images and are referenced relative to the
+  # entry file (src/content/<collection>/en/x.md) so Astro can optimize them.
+  - name: assets
+    label: Images (content)
+    input: src/assets/images
+    output: ../../../assets/images
+    categories: [image]
 
 content:
-  - name: news
-    label: News
+  - name: posts
+    label: פוסטים
     type: collection
-    path: src/content/news
+    path: src/content/posts
+    filename: "{primary}.md"
+    view:
+      fields: [title, date, author]
+      primary: title
+      sort: [date, title, author]
+      default: { sort: date, order: desc }
     fields:
-      - name: title
-        label: Title
+      - { name: title, label: כותרת, type: string, required: true }
+      - { name: description, label: תיאור, type: text, required: true }
+      - { name: date, label: תאריך, type: date, required: true, options: { format: yyyy-MM-dd } }
+      - { name: author, label: כותב, type: string, required: true }
+      - { name: body, label: תוכן, type: rich-text, options: { format: markdown, media: images } }
+
+  # ─── Demo of the innova-astro collections ─────────────────────────────────
+
+  # Articles are an EN + FR pair joined by translationKey. A published entry without
+  # its mirror fails the build, so keep drafts on until both languages exist.
+  - name: articles-en
+    label: "Demo · Articles (EN)"
+    type: collection
+    path: src/content/articles/en
+    filename: "{translationKey}.md"
+    view: &articleView
+      fields: [title, publishDate, draft]
+      primary: title
+      sort: [publishDate, title]
+      default: { sort: publishDate, order: desc }
+    fields:
+      - { name: title, label: Title, type: string, required: true }
+      - { name: lang, type: string, hidden: true, default: en }
+      - &translationKey
+        name: translationKey
+        label: Translation key
         type: string
-      - name: date
-        label: Date
-        type: date
-      - name: body
-        label: Body
-        type: rich-text
+        required: true
+        description: "kebab-case, identical in EN and FR — it pairs the two"
+        pattern: { regex: "^[a-z0-9]+(?:-[a-z0-9]+)*$", message: "kebab-case only (e.g. quiet-rooftop-units)" }
+      - { name: summary, label: Summary, type: text, required: true, options: { maxlength: 200 } }
+      - { name: publishDate, label: Publish date, type: date, required: true, options: { format: yyyy-MM-dd } }
+      - name: hero
+        label: Hero image
+        type: object
+        fields:
+          - name: src
+            label: Image URL
+            type: string
+            description: "Served from https://media.example.com/ — images are not stored in git"
+            pattern: { regex: "^https://media\\.example\\.com/", message: "Must start with https://media.example.com/" }
+          - { name: alt, label: Alt text, type: string }
+      - name: draft
+        label: Draft
+        type: boolean
+        default: true
+        description: "Keep on until both EN and FR are ready — a published entry without its mirror fails the build"
+      - { name: body, label: Body, type: rich-text, options: { format: markdown, media: false } }
+
+  - name: articles-fr
+    label: "Demo · Articles (FR)"
+    type: collection
+    path: src/content/articles/fr
+    filename: "{translationKey}.md"
+    view: *articleView
+    fields:
+      - { name: title, label: Titre, type: string, required: true }
+      - { name: lang, type: string, hidden: true, default: fr }
+      - *translationKey
+      - { name: summary, label: Résumé, type: text, required: true, options: { maxlength: 200 } }
+      - { name: publishDate, label: Date de publication, type: date, required: true, options: { format: yyyy-MM-dd } }
+      - name: hero
+        label: Image principale
+        type: object
+        fields:
+          - name: src
+            label: URL de l'image
+            type: string
+            pattern: { regex: "^https://media\\.example\\.com/", message: "Doit commencer par https://media.example.com/" }
+          - { name: alt, label: Texte alternatif, type: string }
+      - name: draft
+        label: Brouillon
+        type: boolean
+        default: true
+        description: "Laisser activé tant que EN et FR ne sont pas prêts"
+      - { name: body, label: Contenu, type: rich-text, options: { format: markdown, media: false } }
+
+  - name: events
+    label: "Demo · Events"
+    type: collection
+    path: src/content/events/en
+    filename: "{translationKey}.md"
+    view:
+      fields: [title, startDate, location]
+      primary: title
+      sort: [startDate, title]
+      default: { sort: startDate, order: desc }
+    fields:
+      - { name: title, label: Title, type: string, required: true }
+      - { name: lang, type: string, hidden: true, default: en }
+      - *translationKey
+      - { name: startDate, label: Start date, type: date, required: true, options: { format: yyyy-MM-dd } }
+      - { name: endDate, label: End date, type: date, default: "", description: "Last day — leave empty for a one-day event", options: { format: yyyy-MM-dd } }
+      - { name: description, label: Description, type: text, required: true, options: { maxlength: 320 } }
+      - { name: presence, label: Presence, type: string, description: "\"Attending\" or \"Booth #727\"" }
+      - { name: location, label: Location, type: string }
+      - { name: href, label: Event website, type: string, pattern: { regex: "^(https?://.*)?$", message: "Full URL starting with https://" } }
+      - { name: ctaLabel, label: Button label override, type: string }
+      - name: banner
+        label: Banner
+        type: object
+        fields:
+          - { name: src, label: Image, type: image, options: { media: assets } }
+          - { name: alt, label: Alt text, type: string }
+
+  - name: hot-topics
+    label: "Demo · Hot Topics"
+    type: collection
+    path: src/content/hot-topics/en
+    filename: "{translationKey}.md"
+    view: &archiveView
+      fields: [title, publishDate]
+      primary: title
+      sort: [publishDate, title]
+      default: { sort: publishDate, order: desc }
+    fields:
+      - { name: title, label: Title, type: string, required: true }
+      - { name: lang, type: string, hidden: true, default: en }
+      - *translationKey
+      - &standfirst { name: standfirst, label: Standfirst, type: text, required: true, options: { maxlength: 480 } }
+      - &publishDate { name: publishDate, label: Publish date, type: date, required: true, options: { format: yyyy-MM-dd } }
+      - name: categories
+        label: Categories
+        type: select
+        required: true
+        options:
+          multiple: true
+          min: 1
+          values:
+            - { name: case-studies-success-stories, label: "Case Studies & Success Stories" }
+            - { name: events, label: "Past Events" }
+            - { name: emerging-trends-innovation, label: "Emerging Trends & Innovation" }
+            - { name: indoor-air-quality-ventilation, label: "Indoor Air Quality & Ventilation" }
+            - { name: system-performance-efficiency, label: "System Performance & Efficiency" }
+      - &hero
+        name: hero
+        label: Hero image
+        type: object
+        required: true
+        fields:
+          - { name: src, label: Image, type: image, required: true, options: { media: assets } }
+          - { name: alt, label: Alt text, type: string, required: true }
+      - &liveOnly { name: liveOnly, label: Card only (no page), type: boolean, default: false }
+      - &archiveBody { name: body, label: Body, type: rich-text, options: { format: markdown, media: assets } }
+
+  - name: latest-news
+    label: "Demo · Latest News"
+    type: collection
+    path: src/content/latest-news/en
+    filename: "{translationKey}.md"
+    view: *archiveView
+    fields:
+      - { name: title, label: Title, type: string, required: true }
+      - { name: lang, type: string, hidden: true, default: en }
+      - *translationKey
+      - *standfirst
+      - *publishDate
+      - *hero
+      - *liveOnly
+      - *archiveBody
+
+  - name: projects
+    label: "Demo · Projects"
+    type: collection
+    path: src/content/projects/en
+    filename: "{translationKey}.md"
+    view:
+      fields: [order, title, address]
+      primary: title
+      sort: [order, title]
+      default: { sort: order, order: asc }
+    fields:
+      - { name: title, label: Title, type: string, required: true }
+      - { name: lang, type: string, hidden: true, default: en }
+      - *translationKey
+      - { name: address, label: Address, type: string, required: true, description: "Street address, City, ST" }
+      - name: country
+        label: Country
+        type: select
+        required: true
+        options:
+          values:
+            - { name: US, label: US }
+            - { name: CA, label: Canada }
+      - { name: buildingType, label: Building type, type: string, required: true }
+      - { name: modelsInstalled, label: Models installed, type: string, required: true }
+      - { name: description, label: Meta description, type: text }
+      - { name: order, label: Listing order, type: number, required: true, options: { min: 1, step: 1 } }
+      - name: caseStudy
+        label: Case study URL
+        type: string
+        description: "External link (e.g. a PDF viewer) — a full URL, not a site path"
+        pattern: { regex: "^(https?://.*)?$", message: "Full URL starting with https://" }
+      - name: quote
+        label: Quote
+        type: object
+        fields:
+          - { name: text, label: Text, type: text }
+          - { name: name, label: Name, type: string }
+          - { name: role, label: Role, type: string }
+      - name: featuredModel
+        label: Featured model
+        type: object
+        required: true
+        fields:
+          - { name: name, label: Name, type: string, required: true }
+          - name: href
+            label: Link
+            type: string
+            required: true
+            description: "A page on this site, e.g. /models/x — not an external URL"
+            pattern: { regex: "^/", message: "Must be a site path starting with /" }
+          - { name: ctaLabel, label: Button label, type: string, required: true }
+      -
+        name: facade
+        label: Facade image
+        type: object
+        required: true
+        fields:
+          - { name: src, label: Image, type: image, required: true, options: { media: assets } }
+          - { name: alt, label: Alt text, type: string, required: true }
+      - name: card
+        label: Card image
+        type: object
+        required: true
+        fields:
+          - { name: src, label: Image, type: image, required: true, options: { media: assets } }
+          - { name: alt, label: Alt text (may be empty), type: string }
+      - name: gallery
+        label: Gallery
+        type: object
+        list: { collapsible: true }
+        fields:
+          - { name: src, label: Image, type: image, required: true, options: { media: assets } }
+          - { name: alt, label: Alt text, type: string, required: true }
+      - name: featuredModelImage
+        label: Featured model image
+        type: object
+        required: true
+        fields:
+          - { name: src, label: Image, type: image, required: true, options: { media: assets } }
+          - { name: alt, label: Alt text, type: string, required: true }
+      - name: video
+        label: Success-story video
+        type: object
+        fields:
+          - name: url
+            label: Video URL
+            type: string
+            pattern: { regex: "^(https?://.*)?$", message: "Full URL starting with https://" }

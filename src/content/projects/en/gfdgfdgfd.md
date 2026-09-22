@@ -10,7 +10,7 @@ description: hgfhgf
 order: 2
 featuredModel:
   name: gfdgf
-  href: google.com
+  href: /
   ctaLabel: vkfcd
 facade:
   src: ../../../assets/images/Body.jpg
