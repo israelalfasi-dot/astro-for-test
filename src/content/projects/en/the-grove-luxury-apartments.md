@@ -22,7 +22,7 @@ featuredModel:
   ctaLabel: Explore Innova 2.0
 facade:
   src: ../../../assets/images/ChatGPT Image Jul 30, 2026, 02_53_12 PM.png
-  alt: Exterior facade of The Grove Luxury Apartments in Miami
+  alt: Exterior facade of The Grove Luxury Apartments in Miami656
 card:
   src: ../../../assets/images/Louvers — Round vents.jpg
   alt: The Grove Luxury Apartments featuring Innova HVAC systems
