@@ -1,13 +1,18 @@
 ---
-title: "Why Hotel Guests Notice HVAC Noise First"
+title: Why Hotel Guests Notice HVAC
 lang: en
 translationKey: silent-hvac-hotels
-standfirst: "Guest reviews mention room noise more often than bed comfort. In most cases the culprit is the in-room HVAC unit — and it is one of the easiest problems to design out of a renovation."
+standfirst: Guest reviews mention room noise more often than bed comfort. In
+  most cases the culprit is the in-room HVAC unit — and it is one of the easiest
+  problems to design out of a renovation.
 publishDate: 2026-06-18
-categories: [indoor-air-quality-ventilation, system-performance-efficiency]
+categories:
+  - indoor-air-quality-ventilation
+  - system-performance-efficiency
 hero:
   src: ../../../assets/images/placeholder.svg
-  alt: "Quiet hotel room with a slim wall-mounted unit"
+  alt: Quiet hotel room with a slim wall-mounted unit
+liveOnly: false
 ---
 #### **Noise Is a Comfort Metric**
 
